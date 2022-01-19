@@ -48,7 +48,7 @@ class Webdriver:
         except Exception:
             self.driver.execute_script('arguments[0].click();', self.visible(element))
 
-    def visible(self, element: str, timer: int = 10):
+    def visible(self, element: str, timer: int = 30):
         return WDW(self.driver, timer).until(
             EC.visibility_of_element_located((By.XPATH, element)))
 
@@ -124,36 +124,59 @@ class NFTmart:
             web.window_handles(0)
             web.clickable('//*[@id="root"]/header/div/div[5]/div/a')
             web.clickable('//*[@id="root"]/main/div/div/div/div/div[2]/div/div')
-            web.clickable('//*[@id="popover-trigger-20"]/img[2]')
-            web.clickable('//*[@id="popover-body-20"]/div[4]')
+            web.clickable('/html/body/div[1]/header/div/div[5]/div/div[1]/img[2]')
+            web.clickable('/html/body/div[1]/header/div/div[5]/div/div[2]/section/div[2]/div[4]')
             print(f'{green}Logged to NFTmart.{reset}')
         except Exception:
             print(f'\n{red}Login to NFTmart failed, retrying...{reset}')
-            self.polkadot_login()
+            self.nftmart_login()
 
     def nftmart_select_collection(self) -> None:
         print(f'Find Collection of '+reader.collection+' .', end=' ')
         try:
             web.clickable('//*[@id="root"]/main/div[2]/div[2]/div/div/a[*]/div/p[contains(string(), "{}")]'.format(reader.collection))
-            print(f'{green}Find Collection of '+reader.collection+'.{reset}')
+            print(f'{green}Find Collection of {reader.collection}.{reset}')
         except Exception:
             print(f'\n{red}Cannot Find Collection of '+reader.collection+' ...{reset}')
     
     def upload_nft(self,number:int) -> bool:
-            print(f'Uploading NFT n°{number}/{reader.lists_length}.', end=' ')
+            print(f'Uploading NFT {number+1}/{reader.lists_length}.', end=' ')
             file_base=reader.lists[number]
             web.clickable('//*[@id="root"]/main/div[1]/div/a/button')
-            web.send_keys('//*[@id="root"]/main/div[2]/form/div[1]/div[1]/label/div/div/div/div/img', os.path.abspath("Files")+'\\'+file_base["filePath"])
+            web.send_keys('//*[@id="logoUrl"]', os.path.abspath("Files")+'\\'+file_base["filePath"])
             web.send_keys('//*[@id="name"]', file_base["name"])
-            web.send_keys('//*[@id="simplemde-editor-2-wrapper"]/div/div[2]/div[6]/div[1]/div/div/div/div[5]', file_base["description"])
+            web.clickable('/html/body/div[1]/main/div[2]/form/div[3]/div/div[2]/div[6]/div[1]/div/div/div/div[5]/pre')
+            web.send_keys('/html/body/div[1]/main/div[2]/form/div[3]/div/div[2]/div[1]/textarea', file_base["description"])
+            
             propertie_items=list(file_base["properties"].items())
-            print(propertie_items)
             for propertie_item_number in range(len(file_base["properties"])):
                 web.send_keys('//*[@id="'+str(propertie_item_number)+'" and @placeholder="property name"]', propertie_items[propertie_item_number][0])
                 web.send_keys('//*[@id="'+str(propertie_item_number)+'" and @placeholder="property value"]', propertie_items[propertie_item_number][1])
                 if propertie_item_number+1  < len(file_base["properties"]):
-                    web.clickable('//*[@id="root"]/main/div[2]/form/p[contains(string(), "Add  more")]')
-    
+                    web.clickable('//*[@id="root"]/main/div[2]/form/p[2]')
+            web.clickable('//*[@id="root"]/main/div[2]/form/div[5]/button')
+            print(f'{green}Upload Done.{reset}')
+            web.window_handles(1)
+            web.clickable('//*[@id="root"]/main/div[3]/div[1]/div/input')
+            web.send_keys('//*[@id="root"]/main/div[3]/div[1]/div/input',self.password)
+            web.clickable('//*[@id="root"]/main/div[3]/button')
+            web.window_handles(0)
+            # web.clickable('//*[@id="root"]/main/div[3]/div[2]/div[2]/div/div/a/div/div/div[2]/div/p[contains(string(), "{}")]'.format(file_base["name"]))
+            # web.clickable('//*[@id="root"]/main/div[1]/div/div[2]/button')
+            # web.send_keys('//*[@id="price"]',file_base["price"])
+            # web.clickable('//*[@id="deposits"]')
+            # web.send_keys('//*[@id="deposits"]',1)
+            # web.clickable('//*[@id="accordion-panel-796"]/div[1]/button')
+            # web.window_handles(1)
+            # web.clickable('//*[@id="root"]/main/div[3]/div[1]/div/input')
+            # web.send_keys('//*[@id="root"]/main/div[3]/div[1]/div/input',self.password)
+            # web.clickable('//*[@id="root"]/main/div[3]/button')
+            # web.window_handles(0)
+            # web.driver.get(self.nftmart_login_url)
+            # web.clickable('/html/body/div[1]/header/div/div[5]/div/div[1]/img[2]')
+            # web.clickable('/html/body/div[1]/header/div/div[5]/div/div[2]/section/div[2]/div[4]')
+            
+
 
 if __name__ == '__main__':
     recovery_phrase = "snake salt entry tribe ethics history economy lecture purse reveal minimum bird"
@@ -163,7 +186,8 @@ if __name__ == '__main__':
     nftmart.polkadot_login()
     nftmart.nftmart_login()
     nftmart.nftmart_select_collection()
-    nftmart.upload_nft(0)
+    for i in range(999):
+        nftmart.upload_nft(i)
      
 
     # for nft_file_number in range(reader.lists_length):
